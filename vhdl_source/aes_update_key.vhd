@@ -26,13 +26,14 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 entity aes_update_key is
     Port(
+        enc_dec : in STD_LOGIC;
         key : in STD_LOGIC_VECTOR(127 downto 0);
         round_constant : in STD_LOGIC_VECTOR(7 downto 0);
         new_key : out STD_LOGIC_VECTOR(127 downto 0)
     );
 end aes_update_key;
  
- architecture behavioral of aes_update_key is
+architecture behavioral of aes_update_key is
 
 component aes_sbox is
     Port (
@@ -93,7 +94,7 @@ aes_sbox3 : aes_sbox
         o => subword_key3(31 downto 24)
     );
 
-subword_sbox_enc_dec <= '1';  
+subword_sbox_enc_dec <= enc_dec;
 
 -- Rcon operation
     

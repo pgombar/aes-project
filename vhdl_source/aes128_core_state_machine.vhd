@@ -34,8 +34,10 @@ entity aes128_core_state_machine is
         clean_internal_registers : out STD_LOGIC;
         intermediate_text_enable : out STD_LOGIC;
         sel_first_round_process : out STD_LOGIC;
-        sel_load_new_key : out STD_LOGIC;
-        mem_round_keys_write_key_enable : out STD_LOGIC;
+        --sel_load_new_key : out STD_LOGIC;
+        sel_load_new_enc_key : out STD_LOGIC;
+        sel_load_new_dec_key : out STD_LOGIC;
+        --mem_round_keys_write_key_enable : out STD_LOGIC;
         round_key_enable : out STD_LOGIC;
         sel_generate_round_keys : out STD_LOGIC;
         round_number_rstn : out STD_LOGIC;
@@ -63,7 +65,9 @@ signal next_is_last_round : STD_LOGIC;
 signal next_clean_internal_registers : STD_LOGIC;
 signal next_intermediate_text_enable : STD_LOGIC;
 signal next_sel_first_round_process : STD_LOGIC;
-signal next_sel_load_new_key : STD_LOGIC;
+signal next_sel_load_new_enc_key : STD_LOGIC;
+signal next_sel_load_new_dec_key : STD_LOGIC;
+--signal next_sel_load_new_key : STD_LOGIC;
 signal next_mem_round_keys_write_key_enable : STD_LOGIC;
 signal next_round_key_enable : STD_LOGIC;
 signal next_sel_generate_round_keys : STD_LOGIC;
@@ -85,7 +89,9 @@ update_internal_registers : process(clk, rstn)
             clean_internal_registers <= '0';
             intermediate_text_enable <= '0';
             sel_first_round_process <= '0';
-            sel_load_new_key <= '0';
+            --sel_load_new_key <= '0';
+            sel_load_new_enc_key <= '0';
+            sel_load_new_dec_key <= '0';
             mem_round_keys_write_key_enable <= '0';
             round_key_enable <= '0';
             sel_generate_round_keys <= '0';
@@ -102,7 +108,9 @@ update_internal_registers : process(clk, rstn)
             clean_internal_registers <= next_clean_internal_registers;
             intermediate_text_enable <= next_intermediate_text_enable;
             sel_first_round_process <= next_sel_first_round_process;
-            sel_load_new_key <= next_sel_load_new_key;
+            sel_load_new_enc_key <= next_sel_load_new_enc_key;
+            sel_load_new_dec_key <= next_sel_load_new_dec_key;
+            --sel_load_new_key <= next_sel_load_new_key;
             mem_round_keys_write_key_enable <= next_mem_round_keys_write_key_enable;
             round_key_enable <= next_round_key_enable;
             sel_generate_round_keys <= next_sel_generate_round_keys;
@@ -122,7 +130,9 @@ update_output : process(actual_state, start_operation, is_last_key)
         next_clean_internal_registers <= '1';
         next_intermediate_text_enable <= '0';
         next_sel_first_round_process <= '0';
-        next_sel_load_new_key <= '0';
+        --next_sel_load_new_key <= '0';
+        next_sel_load_new_enc_key <= '0';
+        next_sel_load_new_dec_key <= '0';
         next_mem_round_keys_write_key_enable <= '0';
         next_round_key_enable <= '0';
         next_sel_generate_round_keys <= '0';
@@ -151,7 +161,9 @@ update_output : process(actual_state, start_operation, is_last_key)
                     next_core_free <= '1';
                 end if;
             when init_key_schedule =>
-                next_sel_load_new_key <= '1';
+                next_sel_load_new_enc_key <= '1';
+                next_sel_load_new_dec_key <= '1';
+                --next_sel_load_new_key <= '1';
                 next_mem_round_keys_write_key_enable <= '1';
                 next_round_number_key_generation <= '1';
             when wait_key_load_memory =>
