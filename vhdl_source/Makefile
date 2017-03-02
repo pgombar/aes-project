@@ -15,6 +15,7 @@ CORE_OBJ=\
 	$(SHIFTROWS_OBJ)\
 	$(MIXCOLUMNS_OBJ)\
 	aes_inverse_multiply_x_gf_2.o \
+	aes_store_key.o \
 	aes_addroundkeys.o \
 	aes_all_rounds_keys.o \
 	aes_sbox.o \

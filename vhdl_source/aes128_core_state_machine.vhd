@@ -68,7 +68,7 @@ signal next_sel_first_round_process : STD_LOGIC;
 signal next_sel_load_new_enc_key : STD_LOGIC;
 signal next_sel_load_new_dec_key : STD_LOGIC;
 --signal next_sel_load_new_key : STD_LOGIC;
-signal next_mem_round_keys_write_key_enable : STD_LOGIC;
+--signal next_mem_round_keys_write_key_enable : STD_LOGIC;
 signal next_round_key_enable : STD_LOGIC;
 signal next_sel_generate_round_keys : STD_LOGIC;
 signal next_round_number_rst : STD_LOGIC;
@@ -92,7 +92,7 @@ update_internal_registers : process(clk, rstn)
             --sel_load_new_key <= '0';
             sel_load_new_enc_key <= '0';
             sel_load_new_dec_key <= '0';
-            mem_round_keys_write_key_enable <= '0';
+            --mem_round_keys_write_key_enable <= '0';
             round_key_enable <= '0';
             sel_generate_round_keys <= '0';
             round_number_rstn <= '0';
@@ -111,7 +111,7 @@ update_internal_registers : process(clk, rstn)
             sel_load_new_enc_key <= next_sel_load_new_enc_key;
             sel_load_new_dec_key <= next_sel_load_new_dec_key;
             --sel_load_new_key <= next_sel_load_new_key;
-            mem_round_keys_write_key_enable <= next_mem_round_keys_write_key_enable;
+            --mem_round_keys_write_key_enable <= next_mem_round_keys_write_key_enable;
             round_key_enable <= next_round_key_enable;
             sel_generate_round_keys <= next_sel_generate_round_keys;
             round_number_rstn <= next_round_number_rst;
@@ -133,7 +133,7 @@ update_output : process(actual_state, start_operation, is_last_key)
         --next_sel_load_new_key <= '0';
         next_sel_load_new_enc_key <= '0';
         next_sel_load_new_dec_key <= '0';
-        next_mem_round_keys_write_key_enable <= '0';
+        --next_mem_round_keys_write_key_enable <= '0';
         next_round_key_enable <= '0';
         next_sel_generate_round_keys <= '0';
         next_round_number_rst <= '1';
@@ -164,7 +164,7 @@ update_output : process(actual_state, start_operation, is_last_key)
                 next_sel_load_new_enc_key <= '1';
                 next_sel_load_new_dec_key <= '1';
                 --next_sel_load_new_key <= '1';
-                next_mem_round_keys_write_key_enable <= '1';
+                --next_mem_round_keys_write_key_enable <= '1';
                 next_round_number_key_generation <= '1';
             when wait_key_load_memory =>
                 next_round_number_key_generation <= '1';
@@ -172,7 +172,7 @@ update_output : process(actual_state, start_operation, is_last_key)
                 next_round_key_enable <= '1';
                 next_round_number_key_generation <= '1';
             when key_schedule =>
-                next_mem_round_keys_write_key_enable <= '1';
+                --next_mem_round_keys_write_key_enable <= '1';
                 next_round_key_enable <= '1';
                 next_sel_generate_round_keys <= '1';
                 next_round_number_enable <= '1';

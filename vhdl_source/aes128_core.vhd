@@ -67,6 +67,24 @@ component aes128_core_state_machine
     );
 end component;
 
+component aes_update_key
+    Port(
+        enc_dec : in STD_LOGIC;
+        key : in STD_LOGIC_VECTOR(127 downto 0);
+        round_constant : in STD_LOGIC_VECTOR(7 downto 0);
+        new_key : out STD_LOGIC_VECTOR(127 downto 0)
+    );
+end component;
+
+component aes_store_key
+    Port(
+        input_key : in STD_LOGIC_VECTOR(127 downto 0);
+        clk : in STD_LOGIC;
+        write_key_enable : in STD_LOGIC;
+        output_key : out STD_LOGIC_VECTOR(127 downto 0)
+    );
+end component;
+
 component aes_addroundkeys
     Port(
         a : in STD_LOGIC_VECTOR(127 downto 0);
@@ -113,24 +131,15 @@ component aes_inverse_multiply_x_gf_2
     );
 end component;
 
-component aes_all_rounds_keys
-    Port(
-        clk : in STD_LOGIC;
-        input_key : in STD_LOGIC_VECTOR(127 downto 0);
-        round_number : in STD_LOGIC_VECTOR(3 downto 0);
-        write_key_enable : in STD_LOGIC;
-        output_key : out STD_LOGIC_VECTOR(127 downto 0)
-    );
-end component;
-
-component aes_update_key
-    Port(
-        enc_dec : in STD_LOGIC;
-        key : in STD_LOGIC_VECTOR(127 downto 0);
-        round_constant : in STD_LOGIC_VECTOR(7 downto 0);
-        new_key : out STD_LOGIC_VECTOR(127 downto 0)
-    );
-end component;
+--component aes_all_rounds_keys
+--    Port(
+--        clk : in STD_LOGIC;
+--        input_key : in STD_LOGIC_VECTOR(127 downto 0);
+--        round_number : in STD_LOGIC_VECTOR(3 downto 0);
+--        write_key_enable : in STD_LOGIC;
+--        output_key : out STD_LOGIC_VECTOR(127 downto 0)
+--    );
+--end component;
 
 signal input_text_with_key : STD_LOGIC_VECTOR(127 downto 0);
 signal intermediate_text : STD_LOGIC_VECTOR(127 downto 0);
@@ -152,9 +161,11 @@ signal sel_first_round_process : STD_LOGIC;
 signal sel_load_new_enc_key : STD_LOGIC;
 signal sel_load_new_dec_key : STD_LOGIC;
 
-signal mem_round_keys_input_key : STD_LOGIC_VECTOR(127 downto 0);
-signal mem_round_keys_write_key_enable : STD_LOGIC;
-signal mem_round_keys_output_key : STD_LOGIC_VECTOR(127 downto 0);
+--signal mem_round_keys_input_key : STD_LOGIC_VECTOR(127 downto 0);
+--signal mem_round_keys_write_key_enable : STD_LOGIC;
+--signal mem_round_keys_output_key : STD_LOGIC_VECTOR(127 downto 0);
+signal output_enc_key : STD_LOGIC_VECTOR(127 downto 0);
+signal output_dec_key : STD_LOGIC_VECTOR(127 downto 0);
 
 signal round_key_enable : STD_LOGIC;
 signal sel_generate_round_keys : STD_LOGIC;
@@ -193,7 +204,7 @@ state_machine : aes128_core_state_machine
         --sel_load_new_key => sel_load_new_key,
         sel_load_new_enc_key => sel_load_new_enc_key,
         sel_load_new_dec_key => sel_load_new_dec_key,
-        mem_round_keys_write_key_enable => mem_round_keys_write_key_enable,
+        --mem_round_keys_write_key_enable => mem_round_keys_write_key_enable,
         round_key_enable => round_key_enable,
         sel_generate_round_keys => sel_generate_round_keys,
         round_number_rstn => round_number_rstn,
@@ -205,6 +216,21 @@ state_machine : aes128_core_state_machine
         operation_finished => operation_finished
     );
 
+encryption_key_store : aes_store_key
+    Port Map(
+        clk => clk,
+        input_key => input_key,
+        write_key_enable => sel_load_new_enc_key,
+        output_key => output_enc_key
+    );
+
+decryption_key_store : aes_store_key
+    Port Map(
+        clk => clk,
+        input_key => round_key,
+        write_key_enable => sel_load_new_dec_key,
+        output_key => output_dec_key
+    );
 
 first_add_round : aes_addroundkeys
     Port Map(
@@ -265,14 +291,14 @@ round_add_round_after_mix : aes_addroundkeys
         o => intermediate_text_addroundkeys_after_mix
     );
     
-mem_round_keys : aes_all_rounds_keys
-    Port Map(
-        clk => clk,
-        input_key => mem_round_keys_input_key,
-        round_number => round_number,
-        write_key_enable => mem_round_keys_write_key_enable,
-        output_key => mem_round_keys_output_key
-    );
+--mem_round_keys : aes_all_rounds_keys
+--    Port Map(
+--        clk => clk,
+--        input_key => mem_round_keys_input_key,
+--        round_number => round_number,
+--        write_key_enable => mem_round_keys_write_key_enable,
+--        output_key => mem_round_keys_output_key
+--    );
     
 reg_round_keys : process(clk)
     begin
@@ -283,7 +309,12 @@ reg_round_keys : process(clk)
                 if(sel_generate_round_keys = '1') then
                     round_key <= new_round_key;
                 else
-                    round_key <= mem_round_keys_output_key;
+                    --round_key <= mem_round_keys_output_key;
+                    if(encryption_mode_enabled = '1') then
+                        round_key <= output_enc_key;
+                    else
+                        round_key <= output_dec_key;
+                    end if;
                 end if;
             else
                 null;
@@ -358,9 +389,8 @@ ctr_round_number : process(clk)
 
 encryption_mode_enabled <= enc_dec or round_number_key_generation;
     
--- TODO: Change sel_load_new_key??
-mem_round_keys_input_key <= input_key when sel_load_new_key = '1' else
-                            round_key;
+--mem_round_keys_input_key <= input_key when sel_load_new_key = '1' else
+--                            round_key;
                            
 round_mixcolumns_a <= intermediate_text_shiftrows when (enc_dec = '1') else
                       intermediate_text_addroundkeys_before_mix;
