@@ -17,7 +17,6 @@ CORE_OBJ=\
 	aes_inverse_multiply_x_gf_2.o \
 	aes_store_key.o \
 	aes_addroundkeys.o \
-	aes_all_rounds_keys.o \
 	aes_sbox.o \
 	aes_subbytes.o \
 	aes_update_key.o \
