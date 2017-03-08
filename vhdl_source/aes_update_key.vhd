@@ -47,16 +47,26 @@ signal key0 : STD_LOGIC_VECTOR(31 downto 0);
 signal key1 : STD_LOGIC_VECTOR(31 downto 0);
 signal key2 : STD_LOGIC_VECTOR(31 downto 0);
 signal key3 : STD_LOGIC_VECTOR(31 downto 0);
+signal tmp_key3 : STD_LOGIC_VECTOR(31 downto 0);
 
 signal subword_key3 : STD_LOGIC_VECTOR(31 downto 0);
 signal rcon_key3 : STD_LOGIC_VECTOR(31 downto 0);
 
 signal subword_sbox_enc_dec : STD_LOGIC;
 
-signal c0 : STD_LOGIC_VECTOR(31 downto 0);
-signal c1 : STD_LOGIC_VECTOR(31 downto 0);
-signal c2 : STD_LOGIC_VECTOR(31 downto 0);
-signal c3 : STD_LOGIC_VECTOR(31 downto 0);
+signal enc0 : STD_LOGIC_VECTOR(31 downto 0);
+signal enc1 : STD_LOGIC_VECTOR(31 downto 0);
+signal enc2 : STD_LOGIC_VECTOR(31 downto 0);
+signal enc3 : STD_LOGIC_VECTOR(31 downto 0);
+
+
+signal dec0 : STD_LOGIC_VECTOR(31 downto 0);
+signal dec1 : STD_LOGIC_VECTOR(31 downto 0);
+signal dec2 : STD_LOGIC_VECTOR(31 downto 0);
+signal dec3 : STD_LOGIC_VECTOR(31 downto 0);
+
+signal new_key_enc : STD_LOGIC_VECTOR(127 downto 0);
+signal new_key_dec : STD_LOGIC_VECTOR(127 downto 0);
 
 begin
 
@@ -65,31 +75,33 @@ key1 <= key(63 downto 32);
 key2 <= key(95 downto 64);
 key3 <= key(127 downto 96);
 
+tmp_key3 <= dec3 when enc_dec = '0' else key3;
+
 -- SubWord operation
 aes_sbox0 : aes_sbox
     Port Map(
-        a => key3(15 downto 8),
+        a => tmp_key3(15 downto 8),
         enc_dec => subword_sbox_enc_dec,
         o => subword_key3(7 downto 0)
     );
 
 aes_sbox1 : aes_sbox
     Port Map(
-        a => key3(23 downto 16),
+        a => tmp_key3(23 downto 16),
         enc_dec => subword_sbox_enc_dec,
         o => subword_key3(15 downto 8)
     );
 
 aes_sbox2 : aes_sbox
     Port Map(
-        a => key3(31 downto 24),
+        a => tmp_key3(31 downto 24),
         enc_dec => subword_sbox_enc_dec,
         o => subword_key3(23 downto 16)
     );
 
 aes_sbox3 : aes_sbox
     Port Map(
-        a => key3(7 downto 0),
+        a => tmp_key3(7 downto 0),
         enc_dec => subword_sbox_enc_dec,
         o => subword_key3(31 downto 24)
     );
@@ -103,11 +115,19 @@ rcon_key3(7 downto 0) <= subword_key3(7 downto 0) xor round_constant;
 
 -- Key update
 
-c0 <= rcon_key3 xor key0;
-c1 <= c0 xor key1;
-c2 <= c1 xor key2;
-c3 <= c2 xor key3;
+enc0 <= rcon_key3 xor key0;
+enc1 <= enc0 xor key1;
+enc2 <= enc1 xor key2;
+enc3 <= enc2 xor key3;
 
-new_key <= c3 & c2 & c1 & c0;
+dec0 <= rcon_key3 xor key0;
+dec1 <= key0 xor key1;
+dec2 <= key1 xor key2;
+dec3 <= key3 xor key2;
+
+new_key_enc <= enc3 & enc2 & enc1 & enc0;
+new_key_dec <= dec3 & dec2 & dec1 & dec0;
+
+new_key <= new_key_enc when enc_dec = '1' else new_key_dec;
 
 end behavioral;
