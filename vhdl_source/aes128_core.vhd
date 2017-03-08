@@ -60,7 +60,7 @@ component aes128_core_state_machine
         round_number_rstn : out STD_LOGIC;
         round_number_enable : out STD_LOGIC;
         round_number_key_generation : out STD_LOGIC;
-        round_constant_rstn : out STD_LOGIC;
+        round_constant_rst : out STD_LOGIC;
         round_constant_enable : out STD_LOGIC;
         core_free : out STD_LOGIC;
         operation_finished : out STD_LOGIC
@@ -177,7 +177,7 @@ signal round_number_enable : STD_LOGIC;
 signal round_number_key_generation : STD_LOGIC;
 signal round_number : STD_LOGIC_VECTOR(3 downto 0);
 
-signal round_constant_rstn : STD_LOGIC;
+signal round_constant_rst : STD_LOGIC;
 signal round_constant_enable : STD_LOGIC;
 signal round_constant : STD_LOGIC_VECTOR(7 downto 0);
 --signal new_round_constant : STD_LOGIC_VECTOR(7 downto 0);
@@ -210,7 +210,7 @@ state_machine : aes128_core_state_machine
         round_number_rstn => round_number_rstn,
         round_number_enable => round_number_enable,
         round_number_key_generation => round_number_key_generation,
-        round_constant_rstn => round_constant_rstn, 
+        round_constant_rst => round_constant_rst, 
         round_constant_enable => round_constant_enable,
         core_free => core_free,
         operation_finished => operation_finished
@@ -333,7 +333,7 @@ key_schedule : aes_update_key
 reg_round_constant : process(clk)
     begin
         if(rising_edge(clk)) then
-            if(round_constant_rstn = '0' or clean_internal_registers = '0') then
+            if(round_constant_rst = '0' or clean_internal_registers = '0') then
                 --round_constant <= X"01";
                 if(encryption_mode_enabled = '1') then
                     round_constant <= X"01";

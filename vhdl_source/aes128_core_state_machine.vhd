@@ -43,7 +43,7 @@ entity aes128_core_state_machine is
         round_number_rstn : out STD_LOGIC;
         round_number_enable : out STD_LOGIC;
         round_number_key_generation : out STD_LOGIC;
-        round_constant_rstn : out STD_LOGIC;
+        round_constant_rst : out STD_LOGIC;
         round_constant_enable : out STD_LOGIC;
         core_free : out STD_LOGIC;
         operation_finished : out STD_LOGIC
@@ -98,7 +98,7 @@ update_internal_registers : process(clk, rstn)
             round_number_rstn <= '0';
             round_number_enable <= '0';
             round_number_key_generation <= '0';
-            round_constant_rstn <= '0';
+            round_constant_rst <= '0';
             round_constant_enable <= '0';
             core_free <= '0';
             operation_finished <= '0';
@@ -117,7 +117,7 @@ update_internal_registers : process(clk, rstn)
             round_number_rstn <= next_round_number_rst;
             round_number_enable <= next_round_number_enable;
             round_number_key_generation <= next_round_number_key_generation;
-            round_constant_rstn <= next_round_constant_rst;
+            round_constant_rst <= next_round_constant_rst;
             round_constant_enable <= next_round_constant_enable;
             core_free <= next_core_free;
             operation_finished <= next_operation_finished;
@@ -187,22 +187,31 @@ update_output : process(actual_state, start_operation, is_last_key)
                 next_core_free <= '1';
             when init_enc_dec =>
                 next_round_number_enable <= '1';
+                next_round_key_enable <= '1';
+                next_sel_generate_round_keys <= '0';
             when wait_first_round_key =>
                 next_round_key_enable <= '1';
                 next_round_number_enable <= '1';
+                next_round_constant_rst <= '0';
             when first_round_enc_dec =>
                 next_round_key_enable <= '1';
                 next_round_number_enable <= '1';
                 next_intermediate_text_enable <= '1';
+                next_sel_generate_round_keys <= '1';
                 next_sel_first_round_process <= '1';
+                next_round_constant_enable <= '1';
             when remaining_rounds_enc_dec =>
                 next_intermediate_text_enable <= '1';
                 next_round_key_enable <= '1';
                 next_round_number_enable <= '1';
+                next_sel_generate_round_keys <= '1';
+                next_round_key_enable <= '1';
+                next_round_constant_enable <= '1';
             when last_round_enc_dec =>
                 next_intermediate_text_enable <= '1';
                 next_round_key_enable <= '1';
                 next_round_number_enable <= '1';
+                next_sel_generate_round_keys <= '1';
             when finish_enc_dec =>
                 next_core_free <= '1';
                 next_is_last_round <= '1';

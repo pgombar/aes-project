@@ -94,7 +94,7 @@ aes_sbox3 : aes_sbox
         o => subword_key3(31 downto 24)
     );
 
-subword_sbox_enc_dec <= enc_dec;
+subword_sbox_enc_dec <= '1';
 
 -- Rcon operation
     
